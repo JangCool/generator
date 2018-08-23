@@ -10,7 +10,9 @@ public class Log {
 	public static void debug(String message) {
 		out.println("DEBUG : ".concat(message));
 	}
-	
+	public static void debug(Short message) {
+		out.println("DEBUG : ".concat(message.toString()));
+	}
 	public static void warning(String message) {
 		out.println("WARNING : ".concat(message));
 	}
