@@ -10,18 +10,26 @@ public class DBConnection {
 
     private Connection connection;
 
+    private DBInfo dbInfo;
+    
     public DBConnection(DBInfo dbInfo) throws SQLException {
     	
+    	this.dbInfo = dbInfo;
+    	
         try {
-            Class.forName(dbInfo.driver);
-            this.connection = DriverManager.getConnection(dbInfo.url, dbInfo.username, dbInfo.password);
+            Class.forName(dbInfo.getDriver());
+            this.connection = DriverManager.getConnection(dbInfo.getUrl(), dbInfo.getUsername(), dbInfo.getPassword());
         } catch (ClassNotFoundException ex) {
         	Log.error("Database Connection Creation Failed : " + ex.getMessage());
         }
     }
     
+    
+    public DBInfo getDbInfo() {
+		return dbInfo;
+	}
 
-    public Connection getConnection() {
+	public Connection getConnection() {
         return connection;
     }
     

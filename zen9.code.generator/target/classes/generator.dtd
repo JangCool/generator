@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+| : 엘리먼트 내용이 선택적으로 나타날 수 있다.
+, : 엘리먼트 내용이 순서대로 나타나야 한다.
+? : 엘리먼트 내용의 출현회수가 생략되거나(0이거나 1번) 한번 나타난다.
+* : 엘리먼트 내용의 출현회수가 생략되거나(0이거나 그 이상) 여러번 나타난다.
++ : 엘리먼트 내용의 출현회수가 최소 한번 이상 나타난다.
+
+#REQUIRED 필수의 의미로 반드시 명시적으로 문서 본문에서 작성되어야함
+#IMPLIED 생략 가능의 의미로 속성값이 작성되지 않아도 됨
+#FIXED "값" 수정되어서는 안되는 속성의 기본값을 지정함
+
+
+출처: http://puttico.tistory.com/11 [It's working!!]
+
+ 엘리먼트 내용의 출현회수가 한번만 나타난다.
+-->
+<!ELEMENT configuration (properties?, classPathEntry*, context+)>
+	<!ELEMENT properties (property*)>
+	  	<!ELEMENT property EMPTY >
+		<!ATTLIST property
+			key CDATA #IMPLIED
+			value CDATA #IMPLIED>
+			
+
+
+
+	  
+	  
