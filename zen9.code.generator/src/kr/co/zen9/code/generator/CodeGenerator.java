@@ -5,9 +5,9 @@ import kr.co.zen9.code.generator.common.Log;
 import kr.co.zen9.code.generator.jdbc.DBConnection;
 import kr.co.zen9.code.generator.jdbc.DBInfo;
 import kr.co.zen9.code.generator.jdbc.ProcessSql;
+import kr.co.zen9.code.generator.make.BaseMake;
+import kr.co.zen9.code.generator.make.MakeDaoMapper;
 import kr.co.zen9.code.generator.parser.XmlParser;
-import kr.co.zen9.code.generator.process.BaseProcess;
-import kr.co.zen9.code.generator.process.DaoMapperProcess;
 
 public class CodeGenerator {
 	
@@ -35,7 +35,7 @@ public class CodeGenerator {
 			ProcessSql processSql = new ProcessSql(dbConn);
 			  
 			
-			BaseProcess processDao = new DaoMapperProcess(xmlParser,processSql);
+			BaseMake processDao = new MakeDaoMapper(xmlParser,processSql);
 			processDao.generator();
 
 			dbConn.close();

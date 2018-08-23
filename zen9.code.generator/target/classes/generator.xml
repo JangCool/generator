@@ -2,7 +2,7 @@
 <!-- <!DOCTYPE configuration SYSTEM "C:\Users\user\git\generator\zen9.code.generator\resources\generator.dtd"> -->
 <configuration>
 
-	<classPathEntry/>
+	<classPathEntry path ="C:\Users\jangcool\git\sample\sample.mediator\lib\mariadb-java-client-2.1.2.jar" />
 
 	<properties>
 		<property key="package.dao" value="kr.co.abcmart.dao"></property>
@@ -11,10 +11,11 @@
 
       <!-- db 접속 정보 설정 -->
 	<jdbc
-		url="jdbc:sqlserver://211.239.156.168:9262" 
-		driverClass="com.microsoft.sqlserver.jdbc.SQLServerDriver" 
-		username="abcmart"
-		password="abcmart1" 
+
+       	driverClass="org.mariadb.jdbc.Driver" 
+      	url="jdbc:mariadb://127.0.0.1:3306/jc" 
+      	username="root" 
+      	password="1234"
 	/>
 	
 	<controllers>
@@ -27,8 +28,8 @@
 
 
 	<tables business="member" package="${package.dao}" >
-		<table name="TB_AREA" />
-		<table name="TB_ADMIN" />
+		<table name="new_table" />
+<!-- 		<table name="TB_ADMIN" /> -->
 	</tables>
 	
 <!-- 	<tables business="member"> -->
