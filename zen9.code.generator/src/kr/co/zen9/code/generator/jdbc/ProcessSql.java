@@ -17,12 +17,16 @@ public class ProcessSql {
 	
 	private static final String SQL_MSSQL_TABLE_COLUMN = "SELECT column_name,data_type,ordinal_position FROM information_schema.columns where table_name = ? order by ordinal_position";
 	
-	private static final String SQL_MSSQL_TABLE_PK_COLUMN = "SELECT Col.Column_Name, (SELECT data_type FROM information_schema.columns dtcn WHERE dtcn.table_name=col.table_name AND dtcn.column_name=col.column_name) as data_type FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS Tab,INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE Col WHERE Col.Constraint_Name = Tab.Constraint_Name AND Col.Table_Name = Tab.Table_Name AND Constraint_Type = 'PRIMARY KEY' AND Col.Table_Name = ?";
+	private static final String SQL_MSSQL_TABLE_PK_COLUMN = "SELECT Col.Column_Name, (SELECT data_type FROM information_schema.columns dtcn WHERE dtcn.table_name=col.table_name AND dtcn.column_name=col.column_name) as data_type FROM information_schema.table_constraints tab,information_schema.constraint_column_usage col WHERE col.constraint_name = tab.constraint_name AND col.table_name = tab.table_name AND constraint_type = 'PRIMARY KEY' AND col.table_Name = ?";
 
 	private static final String SQL_MYSQL_TABLE_COLUMN = "SELECT column_name,data_type FROM information_schema.columns WHERE table_schema = SCHEMA() AND table_name = ? ORDER BY ORDINAL_POSITION";
 	
-	private static final String SQL_MARIA_TABLE_COLUMN = "SELECT column_name,data_type,column_key as key FROM information_schema.columns WHERE table_schema = SCHEMA() AND table_name = ? ORDER BY ORDINAL_POSITION";
-
+	private static final String SQL_MARIA_TABLE_COLUMN = "SELECT column_name,data_type,column_key as pk , ordinal_position FROM information_schema.columns a WHERE table_schema = SCHEMA() AND table_name = ? ORDER BY ordinal_position";
+	
+	private static final String COLUMN_NAME="COLUMN_NAME"; 
+	
+	private static final String DATA_TYPE="DATA_TYPE"; 
+	
 	private DBConnection connection;
 
 	private List<Map<String,String>> columns;
@@ -101,33 +105,46 @@ public class ProcessSql {
 	public void callMysqlColumn(String tableName) {
 		
 		clearColumns();
+		
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		
+        try {          
+        	pstmt = connection.getConnection().prepareStatement(SQL_MYSQL_TABLE_COLUMN);
+        	pstmt.setString(1, tableName);
 
-        try (
-			PreparedStatement pstmt = connection.getConnection().prepareStatement(SQL_MYSQL_TABLE_COLUMN);
-			ResultSet rs = pstmt.executeQuery();
-		) {            
-
-        	setColumnsResultSet(rs,"PRI");
+        	rs = pstmt.executeQuery();
+        	
+        	setColumnsResultSet(rs,"PK");
             
         } catch (SQLException e) {
 			e.printStackTrace();
-		} 
+		}finally {
+			DBUtil.close(rs);
+			DBUtil.close(pstmt);	
+		}
 	}
 	
-	public void callMariaColumn() {
+	public void callMariaColumn(String tableName) {
 		
 		clearColumns();
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		
+        try {          
+        	pstmt = connection.getConnection().prepareStatement(SQL_MARIA_TABLE_COLUMN);
+        	pstmt.setString(1, tableName);
 
-        try (
-			PreparedStatement pstmt = connection.getConnection().prepareStatement(SQL_MARIA_TABLE_COLUMN);
-			ResultSet rs = pstmt.executeQuery();
-		) {            
-
+        	rs = pstmt.executeQuery();
+        	
         	setColumnsResultSet(rs,"PRI");
             
         } catch (SQLException e) {
 			e.printStackTrace();
-		} 
+		}finally {
+			DBUtil.close(rs);
+			DBUtil.close(pstmt);	
+		}
 	}
 	
 	private void setColumnsResultSet(ResultSet rs) throws SQLException {
@@ -145,12 +162,12 @@ public class ProcessSql {
         	
         	Map<String,String> column = new HashMap<>();
  
-        	column.put("COLUMN_NAME", rs.getString("COLUMN_NAME"));
-        	column.put("DATA_TYPE  ", rs.getString("DATA_TYPE"));
+        	column.put(COLUMN_NAME, rs.getString(COLUMN_NAME));
+        	column.put(DATA_TYPE, rs.getString(DATA_TYPE));
         	
         	if(keyType != null) {
 
-        		String key = rs.getString("KEY");
+        		String key = rs.getString("PK");
         		if(keyType.equals(key)) {
             		tempPrimaryColumns.add(column);        			
         		}
@@ -173,8 +190,8 @@ public class ProcessSql {
         	Map<String,String> column = new HashMap<>();
         	Log.debug("PK column name : " + rs.getString("COLUMN_NAME").concat(", type : ").concat(rs.getString("DATA_TYPE")));
 
-        	column.put("COLUMN_NAME", rs.getString("COLUMN_NAME"));
-        	column.put("DATA_TYPE", rs.getString("DATA_TYPE"));
+        	column.put(COLUMN_NAME, rs.getString(COLUMN_NAME));
+        	column.put(DATA_TYPE, rs.getString(DATA_TYPE));
         	
         	tempPrimaryColumns.add(column);
         }

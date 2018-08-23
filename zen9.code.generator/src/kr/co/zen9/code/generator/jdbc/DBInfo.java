@@ -7,9 +7,10 @@ import kr.co.zen9.code.generator.parser.XmlParser;
 
 public class DBInfo {
 
-	private static final String ORACLE_DRIVER = "";
+	private static final String ORACLE_DRIVER = "oracle.jdbc.driver.OracleDriver";
 	private static final String MSSQL_DRIVER = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
-	private static final String MYSQL_DRIVER = "";
+	private static final String MYSQL_DRIVER = "com.mysql.jdbc.Driver";
+	private static final String MARIA_DRIVER = "org.mariadb.jdbc.Driver";
 	
 	
 	private String driver;
@@ -60,21 +61,21 @@ public class DBInfo {
 		return password;
 	}
 
-
 	public boolean isOracle() {
 		return (ORACLE_DRIVER.equals(driver));
 	}
-
 
 	public boolean isMssql() {
 		return (MSSQL_DRIVER.equals(driver));
 	}
 
-
 	public boolean isMysql() {
 		return (MYSQL_DRIVER.equals(driver));
 	}
 	
+	public boolean isMaria() {
+		return (MARIA_DRIVER.equals(driver));
+	}
 	
 	
 }

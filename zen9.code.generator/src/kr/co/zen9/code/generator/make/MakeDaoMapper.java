@@ -1,4 +1,4 @@
-package kr.co.zen9.code.generator.process;
+package kr.co.zen9.code.generator.make;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -17,18 +17,19 @@ import kr.co.zen9.code.generator.exception.NoneTableNameException;
 import kr.co.zen9.code.generator.jdbc.DBInfo;
 import kr.co.zen9.code.generator.jdbc.ProcessSql;
 import kr.co.zen9.code.generator.parser.XmlParser;
+import kr.co.zen9.code.generator.util.UtilsDate;
 import kr.co.zen9.code.generator.util.UtilsText;
 
-public class DaoMapperProcess extends BaseProcess{
+public class MakeDaoMapper extends BaseMake{
 
 	private ProcessSql processSql;
 	private XmlParser xmlParser;
 	
-	public DaoMapperProcess() {
+	public MakeDaoMapper() {
 		super();
 	}
 	
-	public DaoMapperProcess(XmlParser xmlParser, ProcessSql processSql) {
+	public MakeDaoMapper(XmlParser xmlParser, ProcessSql processSql) {
 		this.processSql = processSql;
 		this.xmlParser = xmlParser;
 	}
@@ -49,7 +50,8 @@ public class DaoMapperProcess extends BaseProcess{
 	   		int childTablesLength = childTables.getLength();
 			
 	   		String target = getPropertyKey(elementTables.getAttribute("target"));
-	   		String packagePh = getPropertyKey(elementTables.getAttribute("package"));
+	   		String orgPackage = getPropertyKey(elementTables.getAttribute("package"));
+	   		String newPackage = orgPackage;
 	   		String business = elementTables.getAttribute("business");
 	   		
 			if(target == null || "".equals(target)) {
@@ -57,10 +59,10 @@ public class DaoMapperProcess extends BaseProcess{
 			}
 			
 	   		if(!UtilsText.isBlank(business)) {
-	   			packagePh = packagePh.concat(".").concat(business);
+	   			newPackage = newPackage.concat(".").concat(business);
 	   		}
 	   		Log.debug("target = " + target);
-	   		Log.debug("package = " + packagePh);
+	   		Log.debug("package = " + newPackage);
 
 	
 			for (int j = 0; j < childTablesLength; j++) {
@@ -68,14 +70,18 @@ public class DaoMapperProcess extends BaseProcess{
 			  		Element element = (Element) childTables.item(j);
 			  		
 	    			if("table".equals(element.getTagName())){	
-	    				Log.debug(element.getAttribute("name"));
+	    				
 	    				String orgTableName = element.getAttribute("name");
+	    				
 	    				if(orgTableName == null) {
 	    					throw new NoneTableNameException("테이블 명이 존재 하지 않습니다.");
 	    				}
 	    				
-	    				createDao(target, UtilsText.convert2CamelCaseTable(orgTableName),packagePh);
-	    				createMapper(target,orgTableName, UtilsText.convert2CamelCaseTable(orgTableName),packagePh);
+	    				String camelTableName = UtilsText.convert2CamelCaseTable(orgTableName);
+	    				
+	    				createDao(target, camelTableName,newPackage);
+	    				createMapper(target,orgTableName, camelTableName,newPackage);
+	    				createDto(target, orgTableName, camelTableName, newPackage);
 					}
 				}
 			}
@@ -96,7 +102,7 @@ public class DaoMapperProcess extends BaseProcess{
 		
 //		Log.debug(target);
 		
-		Map data = new HashMap();
+		Map<String,String> data = new HashMap<>();
 		data.put("tableName", tableName);
 		data.put("package", packagePh);
 
@@ -122,6 +128,8 @@ public class DaoMapperProcess extends BaseProcess{
 			processSql.callMssqlColumn(orgTableName);		
 		}else if(dbInfo.isMysql()) {
 			processSql.callMysqlColumn(orgTableName);		
+		}else if(dbInfo.isMaria()) {
+			processSql.callMariaColumn(orgTableName);		
 		}
 		
 		List<Map<String, String>> columns = processSql.getColumns();
@@ -129,13 +137,16 @@ public class DaoMapperProcess extends BaseProcess{
 		
 		System.out.println("column " + columns.size());
 		System.out.println("pkColumns " + pkColumns.size());
-		Map data = new HashMap();
+		Map<String,String> data = new HashMap<>();
 		data.put("tableName", tableName);
-		data.put("select", Sql.select(tableName,packagePh,columns,pkColumns));
-		data.put("insert", Sql.insert(tableName,packagePh,columns,pkColumns));
-		data.put("update", Sql.update(tableName,packagePh,columns,pkColumns));
-		data.put("delete", Sql.delete(tableName,packagePh,columns,pkColumns));
-		
+		data.put("package", packagePh);
+		data.put("select", PreparedSql.select(orgTableName,packagePh,columns,pkColumns));
+		data.put("insert", PreparedSql.insert(orgTableName,packagePh,columns,pkColumns));
+		data.put("update", PreparedSql.update(orgTableName,packagePh,columns,pkColumns));
+		data.put("delete", PreparedSql.delete(orgTableName,packagePh,columns,pkColumns));
+		data.put("dto", UtilsText.concat(replaceDtoPackage(packagePh),".",tableName));
+		data.put("date", UtilsDate.today(UtilsDate.DEFAULT_DATETIME_PATTERN));
+
 		setDirectoryForTemplate(new File("."));
 		Template template = cfg.getTemplate("template/Mapper.ftl");
 
@@ -143,6 +154,52 @@ public class DaoMapperProcess extends BaseProcess{
 	    template.process(data, file);
 	    file.flush();
 	    file.close();
+	}
+	
+	
+	public void createDto(String target,String orgTableName, String tableName, String newPackage) throws Exception{
+		
+		DBInfo dbInfo = processSql.getDbInfo();
+		
+		if(dbInfo.isOracle()) {
+			processSql.callOracleColumn(orgTableName);				
+		}else if(dbInfo.isMssql()) {
+			processSql.callMssqlColumn(orgTableName);		
+		}else if(dbInfo.isMysql()) {
+			processSql.callMysqlColumn(orgTableName);		
+		}else if(dbInfo.isMaria()) {
+			processSql.callMariaColumn(orgTableName);		
+		}
+		
+		List<Map<String, String>> columns = processSql.getColumns();
+		List<Map<String, String>> pkColumns = processSql.getPrimaryColumns();
+		
+		newPackage = replaceDtoPackage(newPackage);
+		
+		System.out.println("column " + columns.size());
+		System.out.println("pkColumns " + pkColumns.size());
+		Map<String,Object> data = new HashMap<>();
+		data.put("tableName", tableName);
+		data.put("package", newPackage);
+		data.put("dto", PreparedDto.dto(orgTableName,newPackage,columns,pkColumns));
+		data.put("date", UtilsDate.today(UtilsDate.DEFAULT_DATETIME_PATTERN));
+
+		
+		setDirectoryForTemplate(new File("."));
+		Template template = cfg.getTemplate("template/Dto.ftl");
+
+		Writer file = new FileWriter (new File(UtilsText.concat(target,File.separator,tableName,".java")));
+	    template.process(data, file);
+	    file.flush();
+	    file.close();
+	}
+	
+	
+	private static String replaceDtoPackage(String newPackage) {
+		
+		newPackage = newPackage.replace(".repository", ".dto");
+		newPackage = newPackage.replace(".dao", ".dto");
+		return newPackage;
 	}
 	
 

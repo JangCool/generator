@@ -1,4 +1,4 @@
-package kr.co.zen9.code.generator.process;
+package kr.co.zen9.code.generator.make;
 
 import java.io.File;
 
@@ -7,7 +7,7 @@ import freemarker.template.TemplateExceptionHandler;
 import kr.co.zen9.code.generator.common.Config;
 import kr.co.zen9.code.generator.util.UtilsText;
 
-public abstract class BaseProcess {
+public abstract class BaseMake {
 
 	protected Configuration cfg;
 	
@@ -15,7 +15,7 @@ public abstract class BaseProcess {
 	
 	private File targetPath;
 	
-	public BaseProcess() {
+	public BaseMake() {
 	
 		//Instantiate Configuration class  
 		this.cfg = new Configuration(Configuration.VERSION_2_3_28);
