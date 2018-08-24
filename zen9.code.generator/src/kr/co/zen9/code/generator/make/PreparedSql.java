@@ -3,6 +3,11 @@ package kr.co.zen9.code.generator.make;
 import java.util.List;
 import java.util.Map;
 
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import kr.co.zen9.code.generator.common.Const;
 import kr.co.zen9.code.generator.common.Log;
 import kr.co.zen9.code.generator.util.UtilsText;
 
@@ -52,7 +57,7 @@ public class PreparedSql {
 		return jdbc;
 	}
 
-	public static String select(String tableName, String packagePh, List<Map<String, String>> columns, List<Map<String, String>> pkColumns) {
+	public static String select(String tableName, String packagePh, List<Map<String, String>> columns, List<Map<String, String>> pkColumns, NodeList columnNodeList) {
 		
 		StringBuilder sb = new StringBuilder();
 		sb.append("\t");
@@ -80,15 +85,13 @@ public class PreparedSql {
 		sb.append("\t\t\t");
 		sb.append(tableName).append("\n");
 				
-		whereSql(sb, pkColumns);	
+		whereSql(sb, pkColumns,columnNodeList);	
 
-		
-		Log.debug(sb.toString());
 		
 		return sb.toString();
 	}
 	
-	public static String insert(String tableName, String packagePh, List<Map<String, String>> columns, List<Map<String, String>> pkColumns) {
+	public static String insert(String tableName, String packagePh, List<Map<String, String>> columns, List<Map<String, String>> pkColumns, NodeList columnNodeList) {
 		
 		StringBuilder sb = new StringBuilder();
 		sb.append("\t");
@@ -129,9 +132,6 @@ public class PreparedSql {
 				String columnName = UtilsText.convert2CamelCase(orgColumnName);
 				String dataType = column.get("DATA_TYPE");
 				
-				Log.debug(columnName);
-				Log.debug(dataType);
-				
 				if(i > 0) {
 					sb.append(", ");
 				}
@@ -146,13 +146,10 @@ public class PreparedSql {
 		sb.append(" ) ");
 
 		
-		
-		Log.debug(sb.toString());
-		
 		return sb.toString();
 	}
 	
-	public static String update(String tableName, String packagePh, List<Map<String, String>> columns, List<Map<String, String>> pkColumns) {
+	public static String update(String tableName, String packagePh, List<Map<String, String>> columns, List<Map<String, String>> pkColumns, NodeList columnNodeList) {
 		
 		StringBuilder sb = new StringBuilder();
 		sb.append("\t");
@@ -168,8 +165,6 @@ public class PreparedSql {
 				String orgColumnName = column.get("COLUMN_NAME").toLowerCase();
 				String columnName = UtilsText.convert2CamelCase(orgColumnName);
 				String dataType = column.get("DATA_TYPE");
-				Log.debug(columnName);
-				Log.debug(dataType);
 
 				sb.append("\t\t\t").append(UtilsText.concat("<if test=\"",columnName," != null\"> \n"));
 				sb.append("\t\t\t\t").append(orgColumnName).append(" = ").append(UtilsText.concat("#{",columnName,", jdbcType=",jdbcType(dataType),"}, \n"));
@@ -182,25 +177,22 @@ public class PreparedSql {
 		sb.append("\t\t");
 		sb.append("</set> \n");
 
-		whereSql(sb, pkColumns);		
-		
-		Log.debug(sb.toString());
-		
+		whereSql(sb, pkColumns,columnNodeList);		
+				
 		return sb.toString();
 	}
 	
-	public static String delete(String tableName, String packagePh, List<Map<String, String>> columns, List<Map<String, String>> pkColumns) {
+	public static String delete(String tableName, String packagePh, List<Map<String, String>> columns, List<Map<String, String>> pkColumns, NodeList columnNodeList) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("\t");
 		sb.append(UtilsText.concat("DELETE FROM ",tableName,"\n") );
 
-		whereSql(sb, pkColumns);	
+		whereSql(sb, pkColumns,columnNodeList);	
 		
-		Log.debug(sb.toString());
 		return sb.toString();
 	}
 	
-	private static void whereSql(StringBuilder sb, List<Map<String, String>> pkColumns) {	
+	private static void whereSql(StringBuilder sb, List<Map<String, String>> pkColumns, NodeList columnNodeList) {	
 		
 		if( pkColumns != null && pkColumns.size() > 0) {
 
@@ -210,22 +202,67 @@ public class PreparedSql {
 			int i = 0;
 			for (Map<String, String> pkColumn : pkColumns) {
 				
-				String orgColumnName = pkColumn.get("COLUMN_NAME").toLowerCase();
-				String columnName = UtilsText.convert2CamelCase(orgColumnName);				
-				String dataType = pkColumn.get("DATA_TYPE");
+				String orgColumnName = pkColumn.get(Const.COLUMN_NAME).toLowerCase();
 				
-				Log.debug(columnName);
-				Log.debug(dataType);
 				if(i == 0) {
 					sb.append("\t\t\t ");
 				}else {
 					sb.append(" AND ");
 				}
-				sb.append(orgColumnName).append(" = ").append(UtilsText.concat("#{",columnName,", jdbcType=",jdbcType(dataType),"}"));
+				sb.append(orgColumnName).append(" = ").append(generatorColumn(pkColumn, columnNodeList));
 				
 				i++;
 			}
 		}
+	}
+	
+	
+	private static String generatorColumn(Map<String, String> column, NodeList columnNodeList) {
+		
+		StringBuilder sb = new StringBuilder();
+		
+		String orgColumnName = column.get(Const.COLUMN_NAME).toLowerCase();
+		String columnName = UtilsText.convert2CamelCase(orgColumnName);				
+		String dataType = column.get(Const.DATA_TYPE);
+		
+		
+		sb.append(UtilsText.concat("#{",columnName));
+		if(columnNodeList != null && columnNodeList.getLength() > 0 ) {
+			
+			int columnNodeListLength = columnNodeList.getLength();
+			
+			for (int i = 0; i < columnNodeListLength; i++) {
+				if(columnNodeList.item(i).getNodeType() == Node.ELEMENT_NODE){
+			  		Element element = (Element) columnNodeList.item(i);
+			  		
+			  		String name  = element.getAttribute("name");
+			  		String jdbcType  = element.getAttribute("jdbcType");
+			  		String typeHandler  = element.getAttribute("typeHandler");
+			  		
+			  		if(!UtilsText.isBlank(name) && orgColumnName.equals(name.toLowerCase())) {
+			  		
+				  		if(!UtilsText.isBlank(jdbcType)) {
+				  			sb.append(", jdbcType=").append(jdbcType);
+				  		} else {
+				  			sb.append(", jdbcType=").append(jdbcType(dataType));
+				  		}
+				  		
+				  		if(!UtilsText.isBlank(typeHandler)) {
+				  			sb.append(", typeHandler=").append(typeHandler);
+				  		}
+			  		}
+			  		
+				}
+			}
+		}else {
+			sb.append(UtilsText.concat(", jdbcType=",jdbcType(dataType)));
+		}
+		
+		sb.append("}");
+		
+		
+		return sb.toString();
+		
 	}
 	
 

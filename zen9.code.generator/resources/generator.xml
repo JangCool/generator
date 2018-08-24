@@ -12,11 +12,17 @@
       <!-- db 접속 정보 설정 -->
 	<jdbc
 
-       	driverClass="org.mariadb.jdbc.Driver" 
-      	url="jdbc:mariadb://127.0.0.1:3306/jc" 
-      	username="root" 
-      	password="1234"
+		url="jdbc:sqlserver://211.239.156.168:9262" 
+		driverClass="com.microsoft.sqlserver.jdbc.SQLServerDriver" 
+		username="abcmart"
+		password="abcmart1" 
 	/>
+	
+	
+	<path>
+<!-- 		<sources target="src" /> -->
+<!-- 		<mappers target="resources" /> -->
+	</path>
 	
 	<controllers>
 		<controller>Member</controller>
@@ -27,9 +33,13 @@
 	</services>
 
 
-	<tables business="member" package="${package.dao}" >
-		<table name="new_table" />
-<!-- 		<table name="TB_ADMIN" /> -->
+	<tables business="member" package="${package.dao}">
+<!-- 		<table name="new_table" /> -->
+		<table name="TB_ADMIN">
+<!-- 			<column name="admin_id" jdbcType="NUMERIC" typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler" /> -->
+		</table>
+		<table name="TB_AREA"/>
+		
 	</tables>
 	
 <!-- 	<tables business="member"> -->

@@ -4,14 +4,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import kr.co.zen9.code.generator.common.Const;
 import kr.co.zen9.code.generator.common.Log;
 
-public class ProcessSql {
+public class ColumnsResultSet {
 
 	private static final String SQL_ORACLE_TABLE_COLUMN = "SELECT * FROM all_tab_columns WHERE TABLE_NAME= ? ";
 	
@@ -22,10 +22,6 @@ public class ProcessSql {
 	private static final String SQL_MYSQL_TABLE_COLUMN = "SELECT column_name,data_type FROM information_schema.columns WHERE table_schema = SCHEMA() AND table_name = ? ORDER BY ORDINAL_POSITION";
 	
 	private static final String SQL_MARIA_TABLE_COLUMN = "SELECT column_name,data_type,column_key as pk , ordinal_position FROM information_schema.columns a WHERE table_schema = SCHEMA() AND table_name = ? ORDER BY ordinal_position";
-	
-	private static final String COLUMN_NAME="COLUMN_NAME"; 
-	
-	private static final String DATA_TYPE="DATA_TYPE"; 
 	
 	private DBConnection connection;
 
@@ -47,7 +43,7 @@ public class ProcessSql {
 		return primaryColumns;
 	}
 
-	public ProcessSql(DBConnection connection) {
+	public ColumnsResultSet(DBConnection connection) {
 		this.connection = connection;
 		this.dbInfo = connection.getDbInfo();
 	}
@@ -157,13 +153,11 @@ public class ProcessSql {
     	List<Map<String,String>> tempPrimaryColumns = new ArrayList<>();
     	
         while(rs.next()) {
-        	
-        	Log.debug("column name : " + rs.getString("COLUMN_NAME").concat(", type : ").concat(rs.getString("DATA_TYPE")));
-        	
+        	        	
         	Map<String,String> column = new HashMap<>();
  
-        	column.put(COLUMN_NAME, rs.getString(COLUMN_NAME));
-        	column.put(DATA_TYPE, rs.getString(DATA_TYPE));
+        	column.put(Const.COLUMN_NAME, rs.getString(Const.COLUMN_NAME));
+        	column.put(Const.DATA_TYPE, rs.getString(Const.DATA_TYPE));
         	
         	if(keyType != null) {
 
@@ -190,8 +184,8 @@ public class ProcessSql {
         	Map<String,String> column = new HashMap<>();
         	Log.debug("PK column name : " + rs.getString("COLUMN_NAME").concat(", type : ").concat(rs.getString("DATA_TYPE")));
 
-        	column.put(COLUMN_NAME, rs.getString(COLUMN_NAME));
-        	column.put(DATA_TYPE, rs.getString(DATA_TYPE));
+        	column.put(Const.COLUMN_NAME, rs.getString(Const.COLUMN_NAME));
+        	column.put(Const.DATA_TYPE, rs.getString(Const.DATA_TYPE));
         	
         	tempPrimaryColumns.add(column);
         }

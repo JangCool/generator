@@ -1,10 +1,13 @@
 package kr.co.zen9.code.generator;
 
+import org.w3c.dom.Element;
+
 import kr.co.zen9.code.generator.common.Config;
+import kr.co.zen9.code.generator.common.Const;
 import kr.co.zen9.code.generator.common.Log;
+import kr.co.zen9.code.generator.jdbc.ColumnsResultSet;
 import kr.co.zen9.code.generator.jdbc.DBConnection;
 import kr.co.zen9.code.generator.jdbc.DBInfo;
-import kr.co.zen9.code.generator.jdbc.ProcessSql;
 import kr.co.zen9.code.generator.make.BaseMake;
 import kr.co.zen9.code.generator.make.MakeDaoMapper;
 import kr.co.zen9.code.generator.parser.XmlParser;
@@ -20,6 +23,8 @@ public class CodeGenerator {
 		}
 		
 		XmlParser xp = new XmlParser(xmlPath);
+			
+		
 		Config.loadConfiguration(xp);
 		
 		return xp;
@@ -32,7 +37,7 @@ public class CodeGenerator {
 			 
 			Log.debug(Config.getString("package.dao"));
 			DBConnection dbConn = new DBConnection(dbInfo);
-			ProcessSql processSql = new ProcessSql(dbConn);
+			ColumnsResultSet processSql = new ColumnsResultSet(dbConn);
 			  
 			
 			BaseMake processDao = new MakeDaoMapper(xmlParser,processSql);
