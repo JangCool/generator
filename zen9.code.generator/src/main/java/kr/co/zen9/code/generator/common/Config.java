@@ -7,6 +7,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import kr.co.zen9.code.generator.parser.XmlParser;
+import kr.co.zen9.code.generator.util.UtilsText;
 
 
 
@@ -139,5 +140,12 @@ public class Config {
         return false;
     }
     
+    
+	public static String getPropertyKey(String target) {
+		if(UtilsText.getPropertyKey(target) != null) {
+			return target = Config.getString(UtilsText.getPropertyKey(target));			
+		}
+		return null;
+	}
 
 }

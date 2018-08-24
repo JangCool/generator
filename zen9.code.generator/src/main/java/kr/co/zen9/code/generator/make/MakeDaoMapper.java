@@ -12,6 +12,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import freemarker.template.Template;
+import kr.co.zen9.code.generator.common.Global;
 import kr.co.zen9.code.generator.common.Log;
 import kr.co.zen9.code.generator.exception.NoneTableNameException;
 import kr.co.zen9.code.generator.jdbc.ColumnsResultSet;
@@ -19,6 +20,7 @@ import kr.co.zen9.code.generator.jdbc.DBInfo;
 import kr.co.zen9.code.generator.parser.XmlParser;
 import kr.co.zen9.code.generator.util.UtilsDate;
 import kr.co.zen9.code.generator.util.UtilsText;
+import kr.co.zen9.code.generator.vo.GeneratorVO;
 
 public class MakeDaoMapper extends BaseMake{
 
@@ -51,13 +53,20 @@ public class MakeDaoMapper extends BaseMake{
 	   		int childTablesLength = childTables.getLength();
 			
 	   		GeneratorVO gv = new GeneratorVO();
-	   		gv.setTarget(getPropertyKey(elementTables.getAttribute("target")));
-	   		gv.setOrgPkg(getPropertyKey(elementTables.getAttribute("package")));
-	   		gv.setPkg(gv.getOrgPkg());
+	   		
+	   		String tablesPkg = getPropertyKey(elementTables.getAttribute("package"));
+	   		
+	   		if(tablesPkg == null) {
+	   			tablesPkg = getDaoPkg();
+	   		}
+	   		Log.debug("package = " + tablesPkg);
+
+	   		gv.setOrgDaoPkg(tablesPkg);
+	   		gv.setDaoPkg(gv.getOrgDaoPkg());
 	   		gv.setBusiness(elementTables.getAttribute("business"));
 	   		
 	   		Log.debug("target = " + gv.getTarget());
-	   		Log.debug("package = " + gv.getPkg());
+	   		Log.debug("package = " + gv.getDaoPkg());
 
 	
 			for (int j = 0; j < childTablesLength; j++) {
@@ -92,12 +101,13 @@ public class MakeDaoMapper extends BaseMake{
 		
 		Map<String,String> data = new HashMap<>();
 		data.put("tableName", tableName);
-		data.put("package", gv.getPkg());
-		data.put("dto", UtilsText.concat(replaceDtoPackage(gv.getPkg()),".",tableName));
+		data.put("package", gv.getDaoPkg());
+		data.put("dto", UtilsText.concat(replaceDtoPackage(gv.getDaoPkg()),".",tableName));
 		data.put("field", field);
 		data.put("date", UtilsDate.today(UtilsDate.DEFAULT_DATETIME_PATTERN));
-		
-		String folder = UtilsText.concat(getPathSources().getAbsolutePath(),File.separator,gv.getPkg().replace(".", "/"));		
+		data.put("sqlsession", UtilsText.capitalize(Global.getSqlSession()));
+
+		String folder = UtilsText.concat(getPathSources().getAbsolutePath(),File.separator,gv.getDaoPkg().replace(".", "/"));		
 		String path = UtilsText.concat(folder,File.separator,tableName,"Dao.java");
 		
 		writeTemplate("Dao", folder, path, data);
@@ -124,19 +134,25 @@ public class MakeDaoMapper extends BaseMake{
 		
 		Map<String,String> data = new HashMap<>();
 		data.put("tableName", tableName);
-		data.put("package", gv.getPkg());
-		data.put("select", PreparedSql.select(orgTableName,gv.getPkg(),columns,pkColumns,columnNodeList));
-		data.put("insert", PreparedSql.insert(orgTableName,gv.getPkg(),columns,pkColumns,columnNodeList));
-		data.put("update", PreparedSql.update(orgTableName,gv.getPkg(),columns,pkColumns,columnNodeList));
-		data.put("delete", PreparedSql.delete(orgTableName,gv.getPkg(),columns,pkColumns,columnNodeList));
-		data.put("dto", UtilsText.concat(replaceDtoPackage(gv.getPkg()),".",tableName));
+		data.put("package", gv.getDaoPkg());
+		data.put("select", PreparedSql.select(orgTableName,gv.getDaoPkg(),columns,pkColumns,columnNodeList));
+		data.put("insert", PreparedSql.insert(orgTableName,gv.getDaoPkg(),columns,pkColumns,columnNodeList));
+		data.put("update", PreparedSql.update(orgTableName,gv.getDaoPkg(),columns,pkColumns,columnNodeList));
+		data.put("delete", PreparedSql.delete(orgTableName,gv.getDaoPkg(),columns,pkColumns,columnNodeList));
+		data.put("dto", UtilsText.concat(replaceDtoPackage(gv.getDaoPkg()),".",tableName));
 		data.put("date", UtilsDate.today(UtilsDate.DEFAULT_DATETIME_PATTERN));
 
-		
 		String folder = UtilsText.concat(getPathMappers().getAbsolutePath());
+
+		if(!UtilsText.isBlank(Global.getSqlSession())){
+			folder = folder.concat(File.separator).concat(Global.getSqlSession());
+		}
+		
 		if(!UtilsText.isBlank(gv.getBusiness())){
 			folder = folder.concat(File.separator).concat(gv.getBusiness());
 		}
+		
+		
 		String path = UtilsText.concat(folder,File.separator,tableName,"Mapper.xml");
 		
 		writeTemplate("Mapper", folder, path, data);
@@ -160,9 +176,9 @@ public class MakeDaoMapper extends BaseMake{
 		List<Map<String, String>> columns = processSql.getColumns();
 		List<Map<String, String>> pkColumns = processSql.getPrimaryColumns();
 		
-		String pkgDto = replaceDtoPackage(gv.getPkg());
+		String pkgDto = replaceDtoPackage(gv.getDaoPkg());
 		
-		
+		System.out.println("########## " + pkgDto);
 		Map<String,Object> data = new HashMap<>();
 		data.put("tableName", tableName);
 		data.put("package", pkgDto);

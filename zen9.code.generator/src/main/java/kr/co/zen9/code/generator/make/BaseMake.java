@@ -2,12 +2,11 @@ package kr.co.zen9.code.generator.make;
 
 import java.io.File;
 
-import org.w3c.dom.Element;
-
 import freemarker.template.Configuration;
 import freemarker.template.TemplateExceptionHandler;
+import kr.co.zen9.code.generator.CodeGenerator;
 import kr.co.zen9.code.generator.common.Config;
-import kr.co.zen9.code.generator.common.Const;
+import kr.co.zen9.code.generator.common.Global;
 import kr.co.zen9.code.generator.parser.XmlParser;
 import kr.co.zen9.code.generator.util.UtilsText;
 
@@ -19,9 +18,11 @@ public abstract class BaseMake {
 	
 	private File directoryForTemplate;
 	
-	private File pathSources = new File(Const.DEFAULT_PATH_SOURCES);
+	private File pathSources = new File(Global.getPath().getSource());
 
-	private File pathMappers = new File(Const.DEFAULT_PATH_MAPPERS);
+	private File pathMappers = new File(Global.getPath().getMapper());
+	
+	private String daoPkg = Global.getDaoPkg();
 	
 	public BaseMake() {
 		this(null);
@@ -56,37 +57,15 @@ public abstract class BaseMake {
 	
 
 	private void init() {
-		
-		Element pathElement = (Element) xmlParser.getDoc().getElementsByTagName("path").item(0);
-		if(pathElement != null) {
-
-			Element template = (Element) pathElement.getElementsByTagName("template").item(0);
-			Element sources = (Element) pathElement.getElementsByTagName("source").item(0);
-			Element mappers = (Element) pathElement.getElementsByTagName("mapper").item(0);
-
-			try {
-				if(template != null) {
-					String pathTemplate = getPropertyKey(template.getAttribute("target"));
-						setDirectoryForTemplate(new File(pathTemplate == null ? template.getAttribute("target") : pathTemplate));
-				}else {
-					setDirectoryForTemplate(new File("."));
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			
-			if(sources != null) {
-
-				String pathSource = getPropertyKey(sources.getAttribute("target"));
-				this.pathSources = new File(pathSource == null ? sources.getAttribute("target") : pathSource);
-			}			
-			
-			if(mappers != null) {
 				
-				String pathMapper = getPropertyKey(mappers.getAttribute("target"));
-				this.pathMappers = new File(pathMapper == null ? mappers.getAttribute("target") : pathMapper);
-
-			}			
+		try {
+			if(Global.getPath().getTemplate() != null) {
+					setDirectoryForTemplate(new File(Global.getPath().getTemplate()));
+			}else {
+				cfg.setClassForTemplateLoading(CodeGenerator.class,"/");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 	
@@ -96,6 +75,10 @@ public abstract class BaseMake {
 
 	public File getPathMappers() {
 		return pathMappers;
+	}
+	
+	public String getDaoPkg() {
+		return daoPkg;
 	}
 
 	public abstract void generator() throws Exception;

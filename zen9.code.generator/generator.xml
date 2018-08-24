@@ -2,7 +2,7 @@
 <!-- <!DOCTYPE configuration SYSTEM "C:\Users\user\git\generator\zen9.code.generator\resources\generator.dtd"> -->
 <configuration>
 
-	<classPathEntry path ="C:\Users\jangcool\git\sample\sample.mediator\lib\mariadb-java-client-2.1.2.jar" />
+	<classPathEntry/>
 
 	<properties>
 		<property key="package.dao" value="kr.co.abcmart.dao"></property>
@@ -11,19 +11,17 @@
 
       <!-- db 접속 정보 설정 -->
 	<jdbc
-
 		url="jdbc:sqlserver://211.239.156.168:9262" 
 		driverClass="com.microsoft.sqlserver.jdbc.SQLServerDriver" 
 		username="abcmart"
 		password="abcmart1" 
 	/>
-	
-	
+
 	<path>
-<!-- 		<sources target="src" /> -->
-<!-- 		<mappers target="resources" /> -->
-	</path>
-	
+		<template target="" />
+		<source target="" />
+		<mapper target="" />
+	</path>	
 	<controllers>
 		<controller>Member</controller>
 	</controllers>
@@ -33,13 +31,11 @@
 	</services>
 
 
-	<tables business="member" package="${package.dao}">
-<!-- 		<table name="new_table" /> -->
-		<table name="TB_ADMIN">
-<!-- 			<column name="admin_id" jdbcType="NUMERIC" typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler" /> -->
+	<tables business="member" package="${package.dao}" >
+		<table name="TB_AREA">
+			<coulumn name="area_id" jdbcType="NUMERIC" typeHandler="org.apache.ibatis.type.EnumTypeHandler" />
 		</table>
-		<table name="TB_AREA"/>
-		
+		<table name="TB_AREA" />
 	</tables>
 	
 <!-- 	<tables business="member"> -->

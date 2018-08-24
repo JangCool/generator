@@ -1,9 +1,7 @@
 package kr.co.zen9.code.generator;
 
-import org.w3c.dom.Element;
-
 import kr.co.zen9.code.generator.common.Config;
-import kr.co.zen9.code.generator.common.Const;
+import kr.co.zen9.code.generator.common.Global;
 import kr.co.zen9.code.generator.common.Log;
 import kr.co.zen9.code.generator.jdbc.ColumnsResultSet;
 import kr.co.zen9.code.generator.jdbc.DBConnection;
@@ -26,6 +24,7 @@ public class CodeGenerator {
 			
 		
 		Config.loadConfiguration(xp);
+		Global.init(xp);
 		
 		return xp;
 	}
@@ -35,7 +34,6 @@ public class CodeGenerator {
 			XmlParser xmlParser = initParser();
 			DBInfo dbInfo = new DBInfo(xmlParser);
 			 
-			Log.debug(Config.getString("package.dao"));
 			DBConnection dbConn = new DBConnection(dbInfo);
 			ColumnsResultSet processSql = new ColumnsResultSet(dbConn);
 			  
