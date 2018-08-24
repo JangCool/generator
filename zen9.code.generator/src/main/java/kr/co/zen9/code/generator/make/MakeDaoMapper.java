@@ -107,9 +107,15 @@ public class MakeDaoMapper extends BaseMake{
 		data.put("date", UtilsDate.today(UtilsDate.DEFAULT_DATETIME_PATTERN));
 		data.put("sqlsession", UtilsText.capitalize(Global.getSqlSession()));
 
+
 		String folder = UtilsText.concat(getPathSources().getAbsolutePath(),File.separator,gv.getDaoPkg().replace(".", "/"));		
 		String path = UtilsText.concat(folder,File.separator,tableName,"Dao.java");
+
+		String baseFolder = UtilsText.concat(folder,File.separator,"base");		
+		String basePath = UtilsText.concat(baseFolder,File.separator,"Base",tableName,"Dao.java");
 		
+		
+		writeTemplate("BaseDao", baseFolder, basePath, data);
 		writeTemplate("Dao", folder, path, data);
 
 	}
@@ -133,14 +139,16 @@ public class MakeDaoMapper extends BaseMake{
 		List<Map<String, String>> pkColumns = processSql.getPrimaryColumns();
 		
 		Map<String,String> data = new HashMap<>();
-		data.put("tableName", tableName);
-		data.put("package", gv.getDaoPkg());
-		data.put("select", PreparedSql.select(orgTableName,gv.getDaoPkg(),columns,pkColumns,columnNodeList));
-		data.put("insert", PreparedSql.insert(orgTableName,gv.getDaoPkg(),columns,pkColumns,columnNodeList));
-		data.put("update", PreparedSql.update(orgTableName,gv.getDaoPkg(),columns,pkColumns,columnNodeList));
-		data.put("delete", PreparedSql.delete(orgTableName,gv.getDaoPkg(),columns,pkColumns,columnNodeList));
-		data.put("dto", UtilsText.concat(replaceDtoPackage(gv.getDaoPkg()),".",tableName));
-		data.put("date", UtilsDate.today(UtilsDate.DEFAULT_DATETIME_PATTERN));
+		data.put("tableName"			, tableName);
+		data.put("package"				, gv.getDaoPkg());
+		data.put("columns"				, PreparedSql.columns(orgTableName,gv.getDaoPkg(),columns,pkColumns,columnNodeList));
+		data.put("selectByPrimaryKey"	, PreparedSql.selectByPrimaryKey(orgTableName,gv.getDaoPkg(),columns,pkColumns,columnNodeList));
+		data.put("select"				, PreparedSql.select(orgTableName,gv.getDaoPkg(),columns,pkColumns,columnNodeList));
+		data.put("insert"				, PreparedSql.insert(orgTableName,gv.getDaoPkg(),columns,pkColumns,columnNodeList));
+		data.put("update"				, PreparedSql.update(orgTableName,gv.getDaoPkg(),columns,pkColumns,columnNodeList));
+		data.put("delete"				, PreparedSql.delete(orgTableName,gv.getDaoPkg(),columns,pkColumns,columnNodeList));
+		data.put("dto"					, UtilsText.concat(replaceDtoPackage(gv.getDaoPkg()),".",tableName));
+		data.put("date"					, UtilsDate.today(UtilsDate.DEFAULT_DATETIME_PATTERN));
 
 		String folder = UtilsText.concat(getPathMappers().getAbsolutePath());
 
@@ -151,10 +159,15 @@ public class MakeDaoMapper extends BaseMake{
 		if(!UtilsText.isBlank(gv.getBusiness())){
 			folder = folder.concat(File.separator).concat(gv.getBusiness());
 		}
-		
-		
+
 		String path = UtilsText.concat(folder,File.separator,tableName,"Mapper.xml");
 		
+		String baseFolder = UtilsText.concat(folder,File.separator,"base");		
+		String basePath = UtilsText.concat(baseFolder,File.separator,"Base",tableName,"Mapper.xml");
+		
+		
+		
+		writeTemplate("BaseMapper", baseFolder, basePath, data);
 		writeTemplate("Mapper", folder, path, data);
 	}
 	
@@ -178,7 +191,6 @@ public class MakeDaoMapper extends BaseMake{
 		
 		String pkgDto = replaceDtoPackage(gv.getDaoPkg());
 		
-		System.out.println("########## " + pkgDto);
 		Map<String,Object> data = new HashMap<>();
 		data.put("tableName", tableName);
 		data.put("package", pkgDto);
@@ -189,7 +201,10 @@ public class MakeDaoMapper extends BaseMake{
 		String folder = UtilsText.concat(getPathSources().getAbsolutePath(),File.separator,pkgDto.replace(".", "/"));		
 		String path = UtilsText.concat(folder,File.separator,tableName,".java");
 		
+		String baseFolder = UtilsText.concat(folder,File.separator,"base");		
+		String basePath = UtilsText.concat(baseFolder,File.separator,"Base",tableName,".java");
 		
+		writeTemplate("BaseDto", baseFolder, basePath, data);
 		writeTemplate("Dto", folder, path, data);
 	}
 	
@@ -199,14 +214,29 @@ public class MakeDaoMapper extends BaseMake{
 
 		File makeTargetDirectory = new File(folder);
 		
-		if(!makeTargetDirectory.isDirectory()) {
+		boolean isDirectory = makeTargetDirectory.isDirectory();
+		
+		
+		if(!isDirectory) {
 			makeTargetDirectory.mkdirs();
 		}
-		
-		Writer file = new FileWriter (path);
-		template.process(data, file);
-	    file.flush();
-	    file.close();
+
+	    String fileName = UtilsText.rpad(path.substring(path.lastIndexOf(File.separator)+1, path.length()), 30);
+
+		//Base 파일이 아닐 경우 이미 생성 되어 있으면  파일을 다시 쓰지 않고 넘어간다.
+		if( !(new File(path).isFile() && !templateFileName.startsWith("Base")) ) {
+			
+			Writer file = new FileWriter (path);
+			template.process(data, file);
+		    file.flush();
+		    file.close();
+		    
+			Log.debug(fileName + " 파일이 생성 되었습니다.");
+
+		}else {
+			Log.debug(fileName + " 파일이 이미 생성 되어 있기 때문에 건너 뛰었습니다.");
+		}
+
 	}
 	
 	private static String replaceDtoPackage(String newPackage) {

@@ -57,8 +57,7 @@ public class PreparedSql {
 		return jdbc;
 	}
 
-	public static String select(String tableName, String packagePh, List<Map<String, String>> columns, List<Map<String, String>> pkColumns, NodeList columnNodeList) {
-		
+	public static String selectByPrimaryKey(String tableName, String daoPkg, List<Map<String, String>> columns,List<Map<String, String>> pkColumns, NodeList columnNodeList) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("\t");
 		sb.append("SELECT \n");
@@ -85,7 +84,46 @@ public class PreparedSql {
 		sb.append("\t\t\t");
 		sb.append(tableName).append("\n");
 				
-		whereSql(sb, pkColumns,columnNodeList);	
+		whereSqlPk(sb, pkColumns,columnNodeList);	
+
+		
+		return sb.toString();
+	}
+	
+	public static String columns(String tableName, String packagePh, List<Map<String, String>> columns, List<Map<String, String>> pkColumns, NodeList columnNodeList) {
+		
+		StringBuilder sb = new StringBuilder();
+		if( columns != null ) {
+			
+			int i = 0;
+			for (Map<String, String> column : columns) {
+				
+				String columnName = column.get("COLUMN_NAME").toLowerCase();
+				if(i == 0) {
+					sb.append(columnName);
+				}else {
+					sb.append(", ").append(columnName);
+				}
+				
+				i++;
+			}
+		}
+		
+		return sb.toString();
+	}
+	public static String select(String tableName, String packagePh, List<Map<String, String>> columns, List<Map<String, String>> pkColumns, NodeList columnNodeList) {
+		
+		StringBuilder sb = new StringBuilder();
+		sb.append("\t");
+		sb.append("SELECT \n");
+		sb.append("\t\t\t <include refid=\"select-columns\" />");		
+		sb.append("\n");
+		sb.append("\t\t");
+		sb.append("FROM \n");
+		sb.append("\t\t\t");
+		sb.append(tableName).append("\n");
+				
+		whereSql(sb, columns,columnNodeList);	
 
 		
 		return sb.toString();
@@ -177,7 +215,7 @@ public class PreparedSql {
 		sb.append("\t\t");
 		sb.append("</set> \n");
 
-		whereSql(sb, pkColumns,columnNodeList);		
+		whereSqlPk(sb, pkColumns,columnNodeList);		
 				
 		return sb.toString();
 	}
@@ -187,12 +225,12 @@ public class PreparedSql {
 		sb.append("\t");
 		sb.append(UtilsText.concat("DELETE FROM ",tableName,"\n") );
 
-		whereSql(sb, pkColumns,columnNodeList);	
+		whereSqlPk(sb, pkColumns,columnNodeList);	
 		
 		return sb.toString();
 	}
 	
-	private static void whereSql(StringBuilder sb, List<Map<String, String>> pkColumns, NodeList columnNodeList) {	
+	private static void whereSqlPk(StringBuilder sb, List<Map<String, String>> pkColumns, NodeList columnNodeList) {	
 		
 		if( pkColumns != null && pkColumns.size() > 0) {
 
@@ -213,6 +251,39 @@ public class PreparedSql {
 				
 				i++;
 			}
+		}
+	}
+	
+	private static void whereSql(StringBuilder sb, List<Map<String, String>> columns, NodeList columnNodeList) {	
+		
+		if( columns != null && columns.size() > 0) {
+
+			sb.append("\t\t");
+			sb.append("<where> \n");
+
+			int i = 0;
+			for (Map<String, String> column : columns) {
+				
+				String orgColumnName = column.get(Const.COLUMN_NAME).toLowerCase();
+				String columnName = UtilsText.convert2CamelCase(orgColumnName);
+				String dataType = column.get("DATA_TYPE");
+				
+				sb.append("\t\t\t").append(UtilsText.concat("<if test=\"",columnName," != null\"> \n"));
+				
+				
+				if(i == 0) {
+					sb.append("\t\t\t\t ");
+				}else {
+					sb.append("\t\t\t\t AND ");
+				}
+				sb.append(orgColumnName).append(" = ").append(generatorColumn(column, columnNodeList)).append("\n");
+				sb.append("\t\t\t").append(UtilsText.concat("</if> \n"));
+				
+				i++;
+			}
+			sb.append("\t\t");
+			sb.append("</where> ");
+
 		}
 	}
 	
@@ -264,6 +335,8 @@ public class PreparedSql {
 		return sb.toString();
 		
 	}
+
+
 	
 
 }

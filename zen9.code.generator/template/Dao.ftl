@@ -2,47 +2,26 @@ package ${package};
 
 import java.util.List;
 import org.springframework.stereotype.Repository;
-import kr.co.abcmart.zfset.sql.session.SqlSession${sqlsession};
+import ${package}.base.Base${tableName}Dao;
 import ${dto};
 
 @Repository
-public class ${tableName}Dao extends SqlSession${sqlsession} {
+public class ${tableName}Dao extends Base${tableName}Dao {
 	
-    /**
-     * 이 select 메소드는 Code Generator를 통하여 생성 되었습니다.
-     *
-     * @date ${date}
+     /**
+     * 기본 insert, update, delete 메소드는 BaseNewTableDao 클래스에 구현 되어있습니다.
+     * BaseNewTableDao는 절대 수정 불가 하며 새로운 메소드 추가 하실 경우에는 해당 소스에서 작업 하시면 됩니다.
+     * 
+     * ※ 중 요 ※
+     * 
+     *     sqlSession 은 다음 메소드를 이용 하여 호출 합니다. 본인이 쓰고 있는 sqlSession(DB 호출)이 어떤 것인지 
+     *     명확 하게 알아 보기 위함입니다. 
+     * 
+     *       - getSqlSession${sqlsession}()
      */
-	public List<${tableName}> select(${tableName} ${field}) throws Exception {		
-		return getSqlSession${sqlsession}().selectList("${package}.${tableName}.select",${field});
-	}
-	
-    /**
-     * 이 select 메소드는 Code Generator를 통하여 생성 되었습니다.
-     *
-     * @date ${date}
-     */
-	public int insert(${tableName} ${field}) throws Exception {		
-		return getSqlSession${sqlsession}().insert("${package}.${tableName}.insert",${field});
-	}
-	
-    /**
-     * 이 select 메소드는 Code Generator를 통하여 생성 되었습니다.
-     *
-     * @date ${date}
-     */
-	public int update(${tableName} ${field}) throws Exception {		
-		return getSqlSession${sqlsession}().update("${package}.${tableName}.update",${field});
-	}
-	
-	 /**
-     * 이 select 메소드는 Code Generator를 통하여 생성 되었습니다.
-     *
-     * @date ${date}
-     */
-	public int delete(${tableName} ${field}) throws Exception {		
-		return getSqlSession${sqlsession}().delete("${package}.${tableName}.delete",${field});
-	}
 
+	public ${tableName} selectByPrimaryKey(${tableName} ${field}) throws Exception {		
+		return getSqlSession${sqlsession}().selectOne("${package}.${tableName}.selectByPrimaryKey",${field});
+	}
 
 }
