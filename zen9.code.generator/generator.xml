@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- <!DOCTYPE configuration SYSTEM "C:\Users\user\git\generator\zen9.code.generator\resources\generator.dtd"> -->
+<!DOCTYPE configuration SYSTEM "generator.dtd">
 <configuration>
-
-	<classPathEntry/>
 
 	<properties>
 		<property key="package.dao" value="kr.co.abcmart.dao"></property>
@@ -17,23 +15,26 @@
 		password="abcmart1" 
 	/>
 
-	<path>
-		<template target="" />
-		<source target="" />
-		<mapper target="" />
-	</path>	
-	<controllers>
-		<controller>Member</controller>
-	</controllers>
+	<global>
+		<path>
+			<template target="" />
+			<source target="" />
+			<mapper target="" />
+		</path>	
+	</global>
+
+<!-- 	<controllers> -->
+<!-- 		<controller>Member</controller> -->
+<!-- 	</controllers> -->
 	
-	<services>
-		<service>Member</service>
-	</services>
+<!-- 	<services> -->
+<!-- 		<service>Member</service> -->
+<!-- 	</services> -->
 
 
 	<tables business="member" package="${package.dao}" >
 		<table name="TB_AREA">
-			<coulumn name="area_id" jdbcType="NUMERIC" typeHandler="org.apache.ibatis.type.EnumTypeHandler" />
+			<column name="area_id" jdbcType="NUMERIC" typeHandler="org.apache.ibatis.type.EnumTypeHandler" />
 		</table>
 		<table name="TB_AREA" />
 	</tables>

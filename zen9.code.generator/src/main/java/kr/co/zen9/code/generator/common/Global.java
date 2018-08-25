@@ -32,7 +32,11 @@ public class Global {
 				pv.setSource(getTarget(source, Const.DEFAULT_PATH_SOURCES));
 				pv.setMapper(getTarget(mapper, Const.DEFAULT_PATH_MAPPERS));
 
-			}			
+			}else {
+				pv.setTemplate(null);
+				pv.setSource(Const.DEFAULT_PATH_SOURCES);
+				pv.setMapper(Const.DEFAULT_PATH_MAPPERS);
+			}
 						
 			if(sqlSessionEl != null) {
 				Global.sqlSession = getTarget(sqlSessionEl, Const.DEFAULT_SQL_SESSION,"name");

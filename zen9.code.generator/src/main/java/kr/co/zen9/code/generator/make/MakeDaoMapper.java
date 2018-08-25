@@ -36,6 +36,39 @@ public class MakeDaoMapper extends BaseMake{
 		this.processSql = processSql;
 		this.xmlParser = xmlParser;	
 	}
+	
+	/**
+	 * DB 에 접속 하여 해당 Table의 컬럼 정보를 가져 온다.
+	 * 테이블이 있다면 컬럼 정보들을 가져 올 것이고 없다면 컬럼 정보를 가지고 오지 못한다. 
+	 * 이 조건으로 테이블 유무를 결정 한다.
+	 * 
+	 * @param tableName 테이블 이름
+	 * @return boolean
+	 */
+	public boolean getTableColumns(String tableName) {
+		
+		boolean result = true;
+		
+		DBInfo dbInfo = processSql.getDbInfo();
+		
+		if(dbInfo.isOracle()) {
+			processSql.callOracleColumn(tableName);				
+		}else if(dbInfo.isMssql()) {
+			processSql.callMssqlColumn(tableName);		
+		}else if(dbInfo.isMysql()) {
+			processSql.callMysqlColumn(tableName);		
+		}else if(dbInfo.isMaria()) {
+			processSql.callMariaColumn(tableName);		
+		}
+		
+		if(
+			processSql.getColumns() == null || 
+			processSql.getColumns() != null && processSql.getColumns().size() == 0 ) {
+			result = false;
+		}
+		
+		return result;
+	}
 
 	@Override
 	public void generator() throws Exception {
@@ -81,11 +114,22 @@ public class MakeDaoMapper extends BaseMake{
 	    					throw new NoneTableNameException("테이블 명이 존재 하지 않습니다.");
 	    				}
 	    				
+	    				boolean isTable = getTableColumns(orgTableName);
+	    				
+	    				//테이블이 없을 경우 건너 뛴다.
+	    				if(!isTable) {
+	    					Log.debug(UtilsText.rpad(orgTableName, 30) + " 테이블이 존재 하지 않습니다.");
+	    					continue;
+	    				}
+	    				
 	    				String camelTableName = UtilsText.convert2CamelCaseTable(orgTableName);
 
 	    				createDao(gv,orgTableName, camelTableName);
 	    				createMapper(gv,orgTableName, camelTableName,element.getElementsByTagName("column"));
 	    				createDto(gv, orgTableName, camelTableName);
+	    				
+	    				//호출된 컬럼 정보들을 제거 한다.
+	    				processSql.clearColumns();
 					}
 				}
 			}
@@ -95,6 +139,13 @@ public class MakeDaoMapper extends BaseMake{
 
 	}
 	
+	/**
+	 *  dao 파일을 생성 한다.
+	 * @param gv 생성에 필요한 정보를 담고 있는 GeneratorVO 객체
+	 * @param orgTableName db에 존재하는 테이블명
+	 * @param tableName camelcase로 변형된 테이블 명.
+	 * @throws Exception
+	 */
 	private  void createDao(GeneratorVO gv,String orgTableName,String tableName) throws Exception{
 		
 		String field = UtilsText.convert2CamelCase(orgTableName);				
@@ -120,20 +171,15 @@ public class MakeDaoMapper extends BaseMake{
 
 	}
 	
-	
+	/**
+	 *  mapper 파일을 생성 한다.
+	 * @param gv 생성에 필요한 정보를 담고 있는 GeneratorVO 객체
+	 * @param orgTableName db에 존재하는 테이블명
+	 * @param tableName camelcase로 변형된 테이블 명.
+	 * @throws Exception
+	 */	
 	public void createMapper(GeneratorVO gv,String orgTableName, String tableName,NodeList columnNodeList) throws Exception{
 		
-		DBInfo dbInfo = processSql.getDbInfo();
-		
-		if(dbInfo.isOracle()) {
-			processSql.callOracleColumn(orgTableName);				
-		}else if(dbInfo.isMssql()) {
-			processSql.callMssqlColumn(orgTableName);		
-		}else if(dbInfo.isMysql()) {
-			processSql.callMysqlColumn(orgTableName);		
-		}else if(dbInfo.isMaria()) {
-			processSql.callMariaColumn(orgTableName);		
-		}
 		
 		List<Map<String, String>> columns = processSql.getColumns();
 		List<Map<String, String>> pkColumns = processSql.getPrimaryColumns();
@@ -171,7 +217,13 @@ public class MakeDaoMapper extends BaseMake{
 		writeTemplate("Mapper", folder, path, data);
 	}
 	
-	
+	/**
+	 *  dto 파일을 생성 한다.
+	 * @param gv 생성에 필요한 정보를 담고 있는 GeneratorVO 객체
+	 * @param orgTableName db에 존재하는 테이블명
+	 * @param tableName camelcase로 변형된 테이블 명.
+	 * @throws Exception
+	 */
 	public void createDto(GeneratorVO gv,String orgTableName, String tableName) throws Exception{
 		
 		DBInfo dbInfo = processSql.getDbInfo();
@@ -208,6 +260,14 @@ public class MakeDaoMapper extends BaseMake{
 		writeTemplate("Dto", folder, path, data);
 	}
 	
+	/**
+	 * 템플릿 파일을 이용하여 Local 경로에 파일을 생성한다.
+	 * @param templateFileName
+	 * @param folder
+	 * @param path
+	 * @param data
+	 * @throws Exception
+	 */
 	private void writeTemplate(String templateFileName,String folder,String path ,Map data) throws Exception {
 		
 		Template template = cfg.getTemplate(UtilsText.concat("template/",templateFileName,".ftl"));
@@ -231,14 +291,17 @@ public class MakeDaoMapper extends BaseMake{
 		    file.flush();
 		    file.close();
 		    
-			Log.debug(fileName + " 파일이 생성 되었습니다.");
+			Log.debug(UtilsText.rpad(fileName, 30) + " 파일이 생성 되었습니다.");
 
-		}else {
-			Log.debug(fileName + " 파일이 이미 생성 되어 있기 때문에 건너 뛰었습니다.");
 		}
 
 	}
 	
+	/**
+	 * Dao를 만든 직후 Dto도 만들기 위해 패키지명 .dto로 변경 한다.
+	 * @param newPackage
+	 * @return
+	 */
 	private static String replaceDtoPackage(String newPackage) {
 		
 		newPackage = newPackage.replace(".repository", ".dto");

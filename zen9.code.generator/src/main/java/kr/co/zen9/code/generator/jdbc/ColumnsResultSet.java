@@ -194,7 +194,7 @@ public class ColumnsResultSet {
 	}
 	
 	
-	private void clearColumns() {
+	public void clearColumns() {
         this.columns = null;
         this.primaryColumns = null;;
 	}

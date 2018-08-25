@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+	* : 요소가 가지고 있지 않거나 1개 이상 가질 수 있음.
+	+ : 자식요소가 최소 하나 이상 가질 수 있음
+	? : 단 하나의 요소만 가질 수 있음.
+	
+	#REQUIRED : 필수속성(생량X) 절대 생략 되지 않는다.
+    #IMPLIED : 선택속성(생략O) 써도인정 안써도 인정
+    #FIXED "값" : 속성 고정값 #FIXED "축구부" : 반드시 축구부만 사용할수 있다.
+	"값" : 속성 기본값 gen CDATA "m" : FIXED 와 비슷하게 사용 가능하다.
+-->
+
+<!-- configuration(root) 엘리먼트 정의-->		
+<!ELEMENT configuration (properties?,jdbc?,global?,tables*) >
+
+<!-- properties 엘리먼트 정의-->		
+<!ELEMENT properties (property*)>
+	<!ELEMENT property EMPTY>
+		<!ATTLIST property
+			key CDATA #REQUIRED
+			value CDATA #REQUIRED
+		>
+
+<!-- jdbc 엘리먼트 정의-->		
+<!ELEMENT jdbc EMPTY>
+	<!ATTLIST jdbc
+		url CDATA #REQUIRED
+		driverClass CDATA #REQUIRED
+		username CDATA #REQUIRED
+		password CDATA #REQUIRED
+	>
+	
+
+<!-- global 엘리먼트 정의-->		
+<!ELEMENT global (sqlsession?,daopkg?,path?)>
+	<!ELEMENT sqlsession EMPTY>
+		<!ATTLIST sqlsession
+			name CDATA #REQUIRED
+		>
+	<!ELEMENT daopkg EMPTY>
+		<!ATTLIST daopkg
+			target CDATA #REQUIRED
+		>
+	<!ELEMENT path (template?,source?,mapper?)>
+		<!ELEMENT template EMPTY>
+		<!ATTLIST template
+			target CDATA #REQUIRED
+		>
+		<!ELEMENT source EMPTY>
+		<!ATTLIST source
+			target CDATA #REQUIRED
+		>
+		<!ELEMENT mapper EMPTY>
+		<!ATTLIST mapper
+			target CDATA #REQUIRED
+		>			
+
+<!-- table 엘리먼트 정의-->		
+<!ELEMENT tables (table*)>
+	<!ATTLIST tables
+		business CDATA #IMPLIED
+		package CDATA #IMPLIED
+	>
+	<!ELEMENT table (column*)>
+	<!ATTLIST table
+		name CDATA #REQUIRED
+	>
+	<!ELEMENT column EMPTY>
+	<!ATTLIST column
+		name CDATA #REQUIRED
+		jdbcType CDATA #IMPLIED
+		typeHandler CDATA #IMPLIED
+	>
