@@ -247,19 +247,8 @@ public class MakeDaoMapper extends BaseMake{
 	 * @throws Exception
 	 */
 	public void createDto(RepositoryVO gv,String orgTableName, String tableName) throws Exception{
-		
-		DBInfo dbInfo = processSql.getDbInfo();
-		
-		if(dbInfo.isOracle()) {
-			processSql.callOracleColumn(orgTableName);				
-		}else if(dbInfo.isMssql()) {
-			processSql.callMssqlColumn(orgTableName);		
-		}else if(dbInfo.isMysql()) {
-			processSql.callMysqlColumn(orgTableName);		
-		}else if(dbInfo.isMaria()) {
-			processSql.callMariaColumn(orgTableName);		
-		}
-		
+			
+
 		List<Map<String, String>> columns = processSql.getColumns();
 		List<Map<String, String>> pkColumns = processSql.getPrimaryColumns();
 		
