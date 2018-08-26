@@ -9,8 +9,10 @@ import kr.co.zen9.code.generator.vo.PathVO;
 public class Global {
 
 	private static PathVO path;
+	private static String controllerPkg = Const.DEFAULT_PATH_CONTROLLER_PACKAGE;
+	private static String servicePkg = Const.DEFAULT_PATH_SERVICE_PACKAGE;
+	private static String daoPkg = Const.DEFAULT_PATH_DAO_PACKAGE;
 	private static String sqlSession = Const.DEFAULT_SQL_SESSION;
-	private static String daoPkg = Const.DEFAULT_PATH_DAO_PACKAGE ;
 	
 	public static void init(XmlParser xp) {
 		Element global = (Element) xp.getDoc().getElementsByTagName("global").item(0);
@@ -21,7 +23,9 @@ public class Global {
 			Element pathEl = (Element) global.getElementsByTagName("path").item(0);
 			Element sqlSessionEl = (Element) global.getElementsByTagName("sqlsession").item(0);
 			Element daoPkgEl = (Element) global.getElementsByTagName("daopkg").item(0);
-			
+			Element controllerPkgEl = (Element) global.getElementsByTagName("controllerpkg").item(0);
+			Element servicePkgEl = (Element) global.getElementsByTagName("servicepkg").item(0);
+
 			if( pathEl != null ) {
 				
 				Element template = (Element) pathEl.getElementsByTagName("template").item(0);
@@ -44,6 +48,14 @@ public class Global {
 			
 			if(daoPkgEl != null) {
 				Global.daoPkg = getTarget(daoPkgEl, Const.DEFAULT_PATH_DAO_PACKAGE);
+			}
+			
+			if(controllerPkgEl != null) {
+				Global.controllerPkg = getTarget(controllerPkgEl, Const.DEFAULT_PATH_CONTROLLER_PACKAGE);
+			}
+			
+			if(servicePkgEl != null) {
+				Global.servicePkg = getTarget(servicePkgEl, Const.DEFAULT_PATH_SERVICE_PACKAGE);
 			}
 			
 		}else {
@@ -86,12 +98,20 @@ public class Global {
 		return path;
 	}
 
-	public static String getSqlSession() {
-		return sqlSession;
+	public static String getControllerPkg() {
+		return controllerPkg;
+	}
+	
+	public static String getServicePkg() {
+		return servicePkg;
 	}
 
 	public static String getDaoPkg() {
 		return daoPkg;
+	}
+
+	public static String getSqlSession() {
+		return sqlSession;
 	}
 
 	public static void setPath(PathVO path) {

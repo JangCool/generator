@@ -7,6 +7,10 @@ public class Log {
 	private static final PrintStream out = System.out;
 	private static final PrintStream err = System.err;
 	
+	public static void println(String message) {
+		out.println(message);
+	}
+	
 	public static void debug(String message) {
 		out.println("DEBUG : ".concat(message));
 	}

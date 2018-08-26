@@ -20,7 +20,7 @@ import kr.co.zen9.code.generator.jdbc.DBInfo;
 import kr.co.zen9.code.generator.parser.XmlParser;
 import kr.co.zen9.code.generator.util.UtilsDate;
 import kr.co.zen9.code.generator.util.UtilsText;
-import kr.co.zen9.code.generator.vo.GeneratorVO;
+import kr.co.zen9.code.generator.vo.RepositoryVO;
 
 public class MakeDaoMapper extends BaseMake{
 
@@ -76,7 +76,19 @@ public class MakeDaoMapper extends BaseMake{
 		NodeList tables = xmlParser.getDoc().getElementsByTagName("tables");
 		
    		int tablesLength = tables.getLength();
-		
+   		
+   		if(tablesLength > 0 ) {
+   			
+   	   		Log.println("");
+   	   		Log.debug("==================================== Repository Generator ======================================");
+   	   		Log.debug("지금 Dao, Dto, Mapper 파일 생성을 시작 합니다.  ");
+   	   		Log.debug("");
+   	   		Log.debug("path mapper = " + Global.getPath().getMapper());
+   	   		Log.debug("path source = " + Global.getPath().getSource());
+   		}
+   		
+
+   		
 		for (int i = 0; i < tablesLength; i++) {
 			
 			Node nodeTables = tables.item(i);
@@ -85,21 +97,30 @@ public class MakeDaoMapper extends BaseMake{
 			NodeList childTables = elementTables.getElementsByTagName("table");						
 	   		int childTablesLength = childTables.getLength();
 			
-	   		GeneratorVO gv = new GeneratorVO();
+	   		RepositoryVO gv = new RepositoryVO();
 	   		
-	   		String tablesPkg = getPropertyKey(elementTables.getAttribute("package"));
-	   		
-	   		if(tablesPkg == null) {
-	   			tablesPkg = getDaoPkg();
-	   		}
-	   		Log.debug("package = " + tablesPkg);
+	   		String tablesPkg  = getPropertyKey(elementTables.getAttribute("package"));
+	   		String business   = getPropertyKey(elementTables.getAttribute("business"));
+	   		String sqlSession = getPropertyKey(elementTables.getAttribute("sqlsession"));
 
+	   		if(UtilsText.isBlank(tablesPkg)) {
+	   			tablesPkg = Global.getDaoPkg();
+	   		}
+	   		
+	   		if(UtilsText.isBlank(sqlSession)) {
+	   			sqlSession = Global.getSqlSession();
+	   		}
+	   		
 	   		gv.setOrgDaoPkg(tablesPkg);
 	   		gv.setDaoPkg(gv.getOrgDaoPkg());
-	   		gv.setBusiness(elementTables.getAttribute("business"));
+	   		gv.setBusiness(business);
+	   		gv.setSqlSession(sqlSession);
 	   		
-	   		Log.debug("target = " + gv.getTarget());
-	   		Log.debug("package = " + gv.getDaoPkg());
+	   		Log.debug("================================================================================================");
+	   		Log.debug("sqlSession = " + gv.getSqlSession());
+	   		Log.debug("business   = " + gv.getBusiness());
+	   		Log.debug("package    = " + gv.getDaoPkg());
+	   		Log.debug("================================================================================================");
 
 	
 			for (int j = 0; j < childTablesLength; j++) {
@@ -121,6 +142,7 @@ public class MakeDaoMapper extends BaseMake{
 	    					Log.debug(UtilsText.rpad(orgTableName, 30) + " 테이블이 존재 하지 않습니다.");
 	    					continue;
 	    				}
+
 	    				
 	    				String camelTableName = UtilsText.convert2CamelCaseTable(orgTableName);
 
@@ -146,7 +168,7 @@ public class MakeDaoMapper extends BaseMake{
 	 * @param tableName camelcase로 변형된 테이블 명.
 	 * @throws Exception
 	 */
-	private  void createDao(GeneratorVO gv,String orgTableName,String tableName) throws Exception{
+	private  void createDao(RepositoryVO gv,String orgTableName,String tableName) throws Exception{
 		
 		String field = UtilsText.convert2CamelCase(orgTableName);				
 		
@@ -156,7 +178,7 @@ public class MakeDaoMapper extends BaseMake{
 		data.put("dto", UtilsText.concat(replaceDtoPackage(gv.getDaoPkg()),".",tableName));
 		data.put("field", field);
 		data.put("date", UtilsDate.today(UtilsDate.DEFAULT_DATETIME_PATTERN));
-		data.put("sqlsession", UtilsText.capitalize(Global.getSqlSession()));
+		data.put("sqlsession", UtilsText.capitalize(gv.getSqlSession()));
 
 
 		String folder = UtilsText.concat(getPathSources().getAbsolutePath(),File.separator,gv.getDaoPkg().replace(".", "/"));		
@@ -178,7 +200,7 @@ public class MakeDaoMapper extends BaseMake{
 	 * @param tableName camelcase로 변형된 테이블 명.
 	 * @throws Exception
 	 */	
-	public void createMapper(GeneratorVO gv,String orgTableName, String tableName,NodeList columnNodeList) throws Exception{
+	public void createMapper(RepositoryVO gv,String orgTableName, String tableName,NodeList columnNodeList) throws Exception{
 		
 		
 		List<Map<String, String>> columns = processSql.getColumns();
@@ -224,7 +246,7 @@ public class MakeDaoMapper extends BaseMake{
 	 * @param tableName camelcase로 변형된 테이블 명.
 	 * @throws Exception
 	 */
-	public void createDto(GeneratorVO gv,String orgTableName, String tableName) throws Exception{
+	public void createDto(RepositoryVO gv,String orgTableName, String tableName) throws Exception{
 		
 		DBInfo dbInfo = processSql.getDbInfo();
 		
@@ -259,44 +281,7 @@ public class MakeDaoMapper extends BaseMake{
 		writeTemplate("BaseDto", baseFolder, basePath, data);
 		writeTemplate("Dto", folder, path, data);
 	}
-	
-	/**
-	 * 템플릿 파일을 이용하여 Local 경로에 파일을 생성한다.
-	 * @param templateFileName
-	 * @param folder
-	 * @param path
-	 * @param data
-	 * @throws Exception
-	 */
-	private void writeTemplate(String templateFileName,String folder,String path ,Map data) throws Exception {
 		
-		Template template = cfg.getTemplate(UtilsText.concat("template/",templateFileName,".ftl"));
-
-		File makeTargetDirectory = new File(folder);
-		
-		boolean isDirectory = makeTargetDirectory.isDirectory();
-		
-		
-		if(!isDirectory) {
-			makeTargetDirectory.mkdirs();
-		}
-
-	    String fileName = UtilsText.rpad(path.substring(path.lastIndexOf(File.separator)+1, path.length()), 30);
-
-		//Base 파일이 아닐 경우 이미 생성 되어 있으면  파일을 다시 쓰지 않고 넘어간다.
-		if( !(new File(path).isFile() && !templateFileName.startsWith("Base")) ) {
-			
-			Writer file = new FileWriter (path);
-			template.process(data, file);
-		    file.flush();
-		    file.close();
-		    
-			Log.debug(UtilsText.rpad(fileName, 30) + " 파일이 생성 되었습니다.");
-
-		}
-
-	}
-	
 	/**
 	 * Dao를 만든 직후 Dto도 만들기 위해 패키지명 .dto로 변경 한다.
 	 * @param newPackage

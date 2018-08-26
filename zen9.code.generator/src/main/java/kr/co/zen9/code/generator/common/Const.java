@@ -10,6 +10,10 @@ public class Const {
 
 	public static final String DEFAULT_PATH_MAPPERS="src/main/resources/mappers"; 
 	
+	public static final String DEFAULT_PATH_CONTROLLER_PACKAGE="kr.co.zen9.controller"; 
+	
+	public static final String DEFAULT_PATH_SERVICE_PACKAGE="kr.co.zen9.service"; 
+	
 	public static final String DEFAULT_PATH_DAO_PACKAGE="kr.co.zen9.dao"; 
 	
 	public static final String DEFAULT_SQL_SESSION="master"; 

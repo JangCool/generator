@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration SYSTEM "dtd/generator.dtd">
+<configuration>
+
+	<properties>
+		<property key="package.dao" value="kr.co.abcmart.dao"></property>
+	</properties>
+
+      <!-- db 접속 정보 설정 -->
+	<jdbc
+		url="jdbc:mariadb://localhost:3306/jc" 
+		driverClass="org.mariadb.jdbc.Driver" 
+		username="root"
+		password="1234" 
+	/>
+
+	<global>
+<!-- 		<sqlsession name = "slave" /> -->
+<!-- 		<controllerpkg target="kr.co.abcmart.controller" /> -->
+<!-- 		<servicepkg target="kr.co.abcmart.service" /> -->
+<!-- 		<daopkg target="kr.co.abcmart.repository" /> -->
+
+	
+<!-- 		<path> -->
+<!-- 			<template	target="" /> -->
+	<!-- 		<source 	target="src/aaa" /> -->
+	<!-- 		<mapper 	target="" /> -->
+<!-- 		</path>	 -->
+	
+	</global>
+
+	<controllers business="member" package="kr.co.abcmart.controller">
+		<controller name="Member" />
+	</controllers>
+	
+	<services business="member">
+		<service name="Member"></service>
+	</services>
+	
+	<tables business="member">
+		<table name="new_table">
+			<column name="seq" jdbcType="NUMERIC" typeHandler="org.apache.ibatis.type.EnumTypeHandler" />
+		</table>
+		<table name="TB_ADMIN" />
+	</tables>
+	
+
+<!-- 	<tables business="member"> -->
+<!-- 		<table name="T_USER"> -->
+<!-- 			<exclude column="" /> -->
+<!-- 			<exclude column="" /> -->
+<!-- 			<exclude column="" /> -->
+<!-- 		</table> -->
+<!-- 		<table>T_USER</table> -->
+<!-- 		<table>T_USER</table> -->
+<!-- 		<table>T_USER</table> -->
+<!-- 	</tables> -->
+
+</configuration>

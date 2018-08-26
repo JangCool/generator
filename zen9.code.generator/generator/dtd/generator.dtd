@@ -12,7 +12,7 @@
 -->
 
 <!-- configuration(root) 엘리먼트 정의-->		
-<!ELEMENT configuration (properties?,jdbc?,global?,tables*) >
+<!ELEMENT configuration (properties?,jdbc?,global?,controllers*,services*,tables*) >
 
 <!-- properties 엘리먼트 정의-->		
 <!ELEMENT properties (property*)>
@@ -33,11 +33,19 @@
 	
 
 <!-- global 엘리먼트 정의-->		
-<!ELEMENT global (sqlsession?,daopkg?,path?)>
+<!ELEMENT global (sqlsession?,controllerpkg?,servicepkg?,daopkg?,path?)>
 	<!ELEMENT sqlsession EMPTY>
 		<!ATTLIST sqlsession
 			name CDATA #REQUIRED
 		>
+	<!ELEMENT controllerpkg EMPTY>
+		<!ATTLIST controllerpkg
+			target CDATA #REQUIRED
+		>
+	<!ELEMENT servicepkg EMPTY>
+		<!ATTLIST servicepkg
+			target CDATA #REQUIRED
+		>				
 	<!ELEMENT daopkg EMPTY>
 		<!ATTLIST daopkg
 			target CDATA #REQUIRED
@@ -54,17 +62,44 @@
 		<!ELEMENT mapper EMPTY>
 		<!ATTLIST mapper
 			target CDATA #REQUIRED
-		>			
-
+		>		
+			
+<!-- controllers 엘리먼트 정의-->		
+<!ELEMENT controllers (controller*)>
+	<!ATTLIST controllers
+		business CDATA #IMPLIED
+		package CDATA #IMPLIED
+		type (rest | normal) #IMPLIED
+	>
+	<!ELEMENT controller EMPTY>
+	<!ATTLIST controller
+		name CDATA #REQUIRED
+		request-mapping CDATA #IMPLIED
+		type (rest | normal) #IMPLIED
+	>
+	
+<!-- services 엘리먼트 정의-->		
+<!ELEMENT services (service*)>
+	<!ATTLIST services
+		business CDATA #IMPLIED
+		package CDATA #IMPLIED
+	>
+	<!ELEMENT service EMPTY>
+	<!ATTLIST service
+		name CDATA #REQUIRED
+	>
+	
 <!-- table 엘리먼트 정의-->		
 <!ELEMENT tables (table*)>
 	<!ATTLIST tables
 		business CDATA #IMPLIED
 		package CDATA #IMPLIED
+		sqlsession CDATA #IMPLIED
 	>
 	<!ELEMENT table (column*)>
 	<!ATTLIST table
 		name CDATA #REQUIRED
+		sqlsession CDATA #IMPLIED
 	>
 	<!ELEMENT column EMPTY>
 	<!ATTLIST column
