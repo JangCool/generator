@@ -16,28 +16,28 @@ public class Base${tableName}Dao extends SqlSession${sqlsession} {
      * 이 select 메소드는 Code Generator를 통하여 생성 되었습니다.
      */
 	public List<${tableName}> select(${tableName} ${field}) throws Exception {		
-		return getSqlSession${sqlsession}().selectList("${package}.${tableName}.select",${field});
+		return getSqlSession${sqlsession}().selectList("${mapperid}.select",${field});
 	}
 	
     /**
      * 이 select 메소드는 Code Generator를 통하여 생성 되었습니다.
      */
 	public int insert(${tableName} ${field}) throws Exception {		
-		return getSqlSession${sqlsession}().insert("${package}.${tableName}.insert",${field});
+		return getSqlSession${sqlsession}().insert("${mapperid}.insert",${field});
 	}
 	
     /**
      * 이 select 메소드는 Code Generator를 통하여 생성 되었습니다.
      */
 	public int update(${tableName} ${field}) throws Exception {		
-		return getSqlSession${sqlsession}().update("${package}.${tableName}.update",${field});
+		return getSqlSession${sqlsession}().update("${mapperid}.update",${field});
 	}
 	
 	 /**
      * 이 select 메소드는 Code Generator를 통하여 생성 되었습니다.
      */
 	public int delete(${tableName} ${field}) throws Exception {		
-		return getSqlSession${sqlsession}().delete("${package}.${tableName}.delete",${field});
+		return getSqlSession${sqlsession}().delete("${mapperid}.delete",${field});
 	}
 
 

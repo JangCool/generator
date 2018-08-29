@@ -47,6 +47,7 @@ public class MakeController extends BaseMake{
 			Element elementTables = (Element) nodeTables;
 			
 	   		String pkg  = getPropertyKey(elementTables.getAttribute("package"));
+	   		String suffixPkg  = getPropertyKey(elementTables.getAttribute("suffix-package"));
 	   		String business   = getPropertyKey(elementTables.getAttribute("business"));
 	   		String controllersType   = getPropertyKey(elementTables.getAttribute("type"));
 
@@ -56,6 +57,7 @@ public class MakeController extends BaseMake{
 
 	  		ControllerVO cv = new ControllerVO();
 			cv.setPkg(pkg);
+	   		cv.setSuffixPkg(suffixPkg);
 	   		cv.setBusiness(business);
 	   		
 	   		Log.debug("================================================================================================");

@@ -4,7 +4,8 @@ public class BaseVO {
 
 	private String business;
 	private String pkg;
-	
+	private String suffixPkg;
+
 	public String getBusiness() {
 		return business;
 	}
@@ -17,6 +18,11 @@ public class BaseVO {
 	public void setPkg(String pkg) {
 		this.pkg = pkg;
 	}
-	
-	
+	public String getSuffixPkg() {
+		return suffixPkg;
+	}
+	public void setSuffixPkg(String suffixPkg) {
+		this.suffixPkg = suffixPkg;
+	}
+
 }

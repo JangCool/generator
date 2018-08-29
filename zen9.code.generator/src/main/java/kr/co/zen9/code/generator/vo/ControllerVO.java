@@ -24,6 +24,10 @@ public class ControllerVO extends BaseVO{
 			returnValue = returnValue.concat(".").concat(getBusiness());
 		}
 		
+		if(!UtilsText.isBlank(getSuffixPkg())){
+			returnValue = returnValue.concat(".").concat(getSuffixPkg());
+		}
+		
 		return returnValue;
 	}
 	

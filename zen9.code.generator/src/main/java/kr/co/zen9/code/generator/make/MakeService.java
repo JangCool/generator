@@ -45,8 +45,10 @@ public class MakeService extends BaseMake{
 			Node nodeTables = services.item(i);
 			Element elementTables = (Element) nodeTables;
 			
-	   		String pkg  		= getPropertyKey(elementTables.getAttribute("package"));
-	   		String business		= getPropertyKey(elementTables.getAttribute("business"));
+	   		String pkg  				= getPropertyKey(elementTables.getAttribute("package"));
+	   		String suffixPkg 			= getPropertyKey(elementTables.getAttribute("suffix-package"));
+	   		String business				= getPropertyKey(elementTables.getAttribute("business"));
+	   		String proxyTargetProxy		= getPropertyKey(elementTables.getAttribute("proxy-target-class"));
 
 	   		if(UtilsText.isBlank(pkg)) {
 	   			pkg = Global.getServicePkg();
@@ -54,11 +56,15 @@ public class MakeService extends BaseMake{
 
 	   		ServiceVO cv = new ServiceVO();
 			cv.setPkg(pkg);
+			cv.setSuffixPkg(suffixPkg);
 	   		cv.setBusiness(business);
+	   		cv.setProxyTargetProxy(proxyTargetProxy);
 	   		
 	   		Log.debug("================================================================================================");
-	   		Log.debug("business   = " + cv.getBusiness());
-	   		Log.debug("package    = " + cv.getPkg());
+	   		Log.debug("business						= " + cv.getBusiness());
+	   		Log.debug("package						= " + cv.getPkg());
+	   		Log.debug("suffix-package 				= " + cv.getSuffixPkg());
+	   		Log.debug("proxy-target-class			= " + cv.getProxyTargetProxy());
 	   		Log.debug("================================================================================================");
 
 			
@@ -80,11 +86,15 @@ public class MakeService extends BaseMake{
 					
 			  		
 					Map<String,String> data = new HashMap<>();
-					data.put("serviceName"			, serviceName);
-					data.put("package"				, cv.getPkg());
-					
-					writeTemplate("Service", folder, path, data);
-					writeTemplate("ServiceImpl", folderImpl, pathImpl, data);
+					data.put("serviceName"					, serviceName);
+					data.put("package"						, cv.getPkg());
+					data.put("proxyTargetProxy"				, cv.getProxyTargetProxy());
+					 
+					writeTemplate("Service", folder, path, data); 
+
+					if(!"true".equals(cv.getProxyTargetProxy())) {
+						writeTemplate("ServiceImpl", folderImpl, pathImpl, data);						
+					}
 
 				}
 			}

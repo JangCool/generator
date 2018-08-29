@@ -21,7 +21,7 @@ public class ${tableName}Dao extends Base${tableName}Dao {
      */
 
 	public ${tableName} selectByPrimaryKey(${tableName} ${field}) throws Exception {		
-		return getSqlSession${sqlsession}().selectOne("${package}.${tableName}.selectByPrimaryKey",${field});
+		return getSqlSession${sqlsession}().selectOne("${mapperid}.selectByPrimaryKey",${field});
 	}
 
 }

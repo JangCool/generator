@@ -2,25 +2,13 @@ package kr.co.zen9.code.generator.vo;
 
 import kr.co.zen9.code.generator.util.UtilsText;
 
-public class RepositoryVO {
+public class RepositoryVO extends BaseVO{
 	
-//	private String target;
 	private String orgDaoPkg;
-	private String daoPkg;
 	private String business;
 	private String sqlSession;
+	private String mapperPkg;
 	
-//	public String getTarget() {
-//		return target;
-//	}
-//	public void setTarget(String target) {
-//		
-//		if(target == null || "".equals(target)) {
-//			target = ".";
-//		}
-//		
-//		this.target = target;
-//	}
 	
 	public String getOrgDaoPkg() {
 		return orgDaoPkg;
@@ -30,9 +18,32 @@ public class RepositoryVO {
 		this.orgDaoPkg = orgDaoPkg;
 	}
 	
-	public String getDaoPkg() {	
+	public String getPkg() {	
 		
-		String returnValue = daoPkg;
+		String returnValue = super.getPkg();
+
+		
+		if(!UtilsText.isBlank(getBusiness())){
+			returnValue = returnValue.concat(".").concat(getBusiness());
+		}
+		
+		if(!UtilsText.isBlank(getSuffixPkg())){
+			returnValue = returnValue.concat(".").concat(getSuffixPkg());
+		}
+		
+		if(!UtilsText.isBlank(getSqlSession())){
+			returnValue = returnValue.concat(".").concat(getSqlSession());
+		}
+		
+
+
+		return returnValue;
+	}
+
+	
+	public String getMapperPkg() {	
+		
+		String returnValue = "";
 
 		if(!UtilsText.isBlank(getSqlSession())){
 			returnValue = returnValue.concat(".").concat(getSqlSession());
@@ -45,9 +56,6 @@ public class RepositoryVO {
 		return returnValue;
 	}
 	
-	public void setDaoPkg(String daoPkg) {
-		this.daoPkg = daoPkg;
-	}
 	
 	public String getBusiness() {
 		return business;

@@ -1,5 +1,7 @@
 package kr.co.zen9.code.generator;
 
+import java.io.File;
+
 import kr.co.zen9.code.generator.common.Config;
 import kr.co.zen9.code.generator.common.Global;
 import kr.co.zen9.code.generator.jdbc.ColumnsResultSet;
@@ -18,7 +20,7 @@ public class CodeGenerator {
 		String xmlPath = System.getProperty("generator.path");
 		
 		if(xmlPath == null ||  xmlPath != null && xmlPath.equals("")){
-			xmlPath = ".";
+			xmlPath = "generator".concat(File.separator).concat("generator.xml");
 		}
 		
 		XmlParser xp = new XmlParser(xmlPath);
