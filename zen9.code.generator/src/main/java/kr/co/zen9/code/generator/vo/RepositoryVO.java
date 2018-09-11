@@ -7,8 +7,10 @@ public class RepositoryVO extends BaseVO{
 	private String orgDaoPkg;
 	private String business;
 	private String sqlSession;
-	private String mapperPkg;
-	
+	private String alias;
+	private String prefix;
+	private String suffix;
+
 	
 	public String getOrgDaoPkg() {
 		return orgDaoPkg;
@@ -68,8 +70,33 @@ public class RepositoryVO extends BaseVO{
 	public String getSqlSession() {
 		return sqlSession;
 	}
+	
 	public void setSqlSession(String sqlSession) {
 		this.sqlSession = sqlSession;
+	}
+
+	public String getAlias() {
+		return alias;
+	}
+
+	public void setAlias(String alias) {
+		this.alias = alias;
+	}
+
+	public String getPrefix() {
+		return prefix;
+	}
+
+	public void setPrefix(String prefix) {
+		this.prefix = prefix;
+	}
+
+	public String getSuffix() {
+		return suffix;
+	}
+
+	public void setSuffix(String suffix) {
+		this.suffix = suffix;
 	}
 	
 	

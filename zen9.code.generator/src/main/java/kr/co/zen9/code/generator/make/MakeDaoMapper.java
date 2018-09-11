@@ -104,6 +104,7 @@ public class MakeDaoMapper extends BaseMake{
 	   		String business  		= getPropertyKey(elementTables.getAttribute("business"));
 	   		String sqlSession 		= getPropertyKey(elementTables.getAttribute("sqlsession"));
 
+
 	   		if(UtilsText.isBlank(tablesPkg)) {
 	   			tablesPkg = Global.getDaoPkg();
 	   		}
@@ -117,7 +118,7 @@ public class MakeDaoMapper extends BaseMake{
 	   		gv.setSuffixPkg(tablesSuffixPkg);
 	   		gv.setBusiness(business);
 	   		gv.setSqlSession(sqlSession);
-	   		
+
 	   		Log.debug("================================================================================================");
 	   		Log.debug("sqlSession		 = " + gv.getSqlSession());
 	   		Log.debug("business   		 = " + gv.getBusiness());
@@ -144,6 +145,21 @@ public class MakeDaoMapper extends BaseMake{
 	    				if(!isTable) {
 	    					Log.debug(UtilsText.rpad(orgTableName, 30) + " 테이블이 존재 하지 않습니다.");
 	    					continue;
+	    				}
+	    				
+	    		   		gv.setAlias(getPropertyKey(element.getAttribute("alias")));
+	    		   		gv.setPrefix(getPropertyKey(element.getAttribute("prefix")));
+	    		   		gv.setSuffix(getPropertyKey(element.getAttribute("suffix")));
+	    		   		
+	    		   		
+	    				if(!UtilsText.isBlank(gv.getPrefix())) {
+	    					orgTableName = UtilsText.concat(gv.getPrefix(),orgTableName);
+	    				}
+	    				if(!UtilsText.isBlank(gv.getAlias())) {
+	    					orgTableName = UtilsText.concat(gv.getAlias());
+	    				}
+	    				if(!UtilsText.isBlank(gv.getSuffix())) {
+	    					orgTableName = UtilsText.concat(orgTableName,gv.getSuffix());
 	    				}
 
 	    				
@@ -179,7 +195,7 @@ public class MakeDaoMapper extends BaseMake{
 		data.put("tableName", tableName);
 		data.put("package", gv.getPkg());
 		data.put("dto", UtilsText.concat(replaceDtoPackage(gv.getPkg()),".",tableName));
-		data.put("mapperid", UtilsText.concat(gv.getSqlSession(),".",tableName));
+		data.put("mapperid", UtilsText.concat(gv.getPkg(),".",tableName));
 		data.put("field", field);
 		data.put("date", UtilsDate.today(UtilsDate.DEFAULT_DATETIME_PATTERN));
 		data.put("sqlsession", UtilsText.capitalize(gv.getSqlSession()));
@@ -220,7 +236,7 @@ public class MakeDaoMapper extends BaseMake{
 		data.put("update"				, PreparedSql.update(orgTableName,gv.getPkg(),columns,pkColumns,columnNodeList));
 		data.put("delete"				, PreparedSql.delete(orgTableName,gv.getPkg(),columns,pkColumns,columnNodeList));
 		data.put("dto"					, UtilsText.concat(replaceDtoPackage(gv.getPkg()),".",tableName));
-		data.put("mapperid"				, UtilsText.concat(gv.getSqlSession(),".",tableName));
+		data.put("mapperid"				, UtilsText.concat(gv.getPkg(),".",tableName,"Dao"));
 		data.put("date"					, UtilsDate.today(UtilsDate.DEFAULT_DATETIME_PATTERN));
 
 		String folder = UtilsText.concat(getPathMappers().getAbsolutePath(),File.separator,gv.getMapperPkg().replace(".", "/"));
